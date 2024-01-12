@@ -1,2 +1,6 @@
+import app.components.game as game
+
+
 def start():
-    print('ciao mondo')
+    game.run()
+
