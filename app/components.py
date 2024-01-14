@@ -54,7 +54,7 @@ class Ball:
         self.pos_y = int(GRID_HEIGHT / 2)
         self.set_random_velocity()
 
-    def move(self, paddle):
+    def move(self, left_paddle, right_paddle):
         # vertical bounds, it doesn't have to check anything else as the ball just bounces off
         self.pos_y += self.velocity_y
         if self.pos_y <= 1:
@@ -67,23 +67,23 @@ class Ball:
         # horizontal bounds, it has to check for collision with the paddles as well
         self.pos_x += self.velocity_x
         if self.pos_x <= PADDLE_WIDTH:
-            if self.check_collision_with_paddles(paddle):
+            if self.check_collision_with_paddles(left_paddle, right_paddle):
                 self.pos_x = PADDLE_WIDTH
                 self.velocity_x = -self.velocity_x
         elif self.pos_x >= GRID_WIDTH - PADDLE_WIDTH:
-            if self.check_collision_with_paddles(paddle):
+            if self.check_collision_with_paddles(left_paddle, right_paddle):
                 self.pos_x = GRID_WIDTH - PADDLE_WIDTH
                 self.velocity_x = -self.velocity_x
 
     # checks for collision with input paddle
-    def check_collision_with_paddles(self, paddle):
+    def check_collision_with_paddles(self, left_paddle, right_paddle):
         if self.pos_x <= PADDLE_WIDTH + 1:
-            if paddle.pos_y - PADDLE_HEIGHT < self.pos_y < paddle.pos_y + PADDLE_HEIGHT:
+            if left_paddle.pos_y - PADDLE_HEIGHT < self.pos_y < left_paddle.pos_y + PADDLE_HEIGHT:
                 return True
             else:
                 return False
         elif self.pos_x >= GRID_WIDTH - PADDLE_WIDTH - 1:
-            if paddle.pos_y - PADDLE_HEIGHT < self.pos_y < paddle.pos_y + PADDLE_HEIGHT:
+            if right_paddle.pos_y - PADDLE_HEIGHT < self.pos_y < right_paddle.pos_y + PADDLE_HEIGHT:
                 return True
             else:
                 return False

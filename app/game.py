@@ -10,17 +10,17 @@ class Grid:
     def __init__(self):
         self.matrix = [[EMPTY_CHAR for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
 
-    def update_grid(self, ball, paddle):
+    def update_grid(self, ball, left_paddle, right_paddle):
         self.matrix = [[EMPTY_CHAR for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
 
         for i in range(PADDLE_WIDTH):
             for j in range(GRID_HEIGHT):
-                if paddle.pos_y - PADDLE_HEIGHT < j < paddle.pos_y + PADDLE_HEIGHT:
+                if left_paddle.pos_y - PADDLE_HEIGHT < j < left_paddle.pos_y + PADDLE_HEIGHT:
                     self.matrix[i][j] = PADDLE_CHAR
 
         for i in range(PADDLE_WIDTH):
             for j in range(GRID_HEIGHT):
-                if paddle.pos_y - PADDLE_HEIGHT < j < paddle.pos_y + PADDLE_HEIGHT:
+                if right_paddle.pos_y - PADDLE_HEIGHT < j < right_paddle.pos_y + PADDLE_HEIGHT:
                     self.matrix[GRID_WIDTH - i - 1][j] = PADDLE_CHAR
 
         self.matrix[ball.pos_x][ball.pos_y] = BALL_CHAR
@@ -66,7 +66,8 @@ class Scorekeeper:
 def run():
     grid = Grid()
     ball = Ball()
-    paddle = Paddle()
+    left_paddle = Paddle()
+    right_paddle = Paddle()
     scorekeeper = Scorekeeper()
     pygame.init()
     pygame.font.init()
@@ -81,17 +82,22 @@ def run():
                 running = False
             elif i.type == pygame.KEYDOWN:
                 if i.key == pygame.K_w:
-                    paddle.velocity = -1
+                    left_paddle.velocity = -1
                 if i.key == pygame.K_s:
-                    paddle.velocity = 1
+                    left_paddle.velocity = 1
+                if i.key == pygame.K_UP:
+                    right_paddle.velocity = -1
+                if i.key == pygame.K_DOWN:
+                    right_paddle.velocity = 1
 
-        paddle.move()
-        ball.move(paddle)
+        left_paddle.move()
+        right_paddle.move()
+        ball.move(left_paddle, right_paddle)
         if ball.is_out():
             scorekeeper.update_score(ball)
             ball.reset_position()
             ball.set_random_velocity()
-        grid.update_grid(ball, paddle)
+        grid.update_grid(ball, left_paddle, right_paddle)
         grid.display(screen)
         scorekeeper.display(screen)
         pygame.display.flip()
