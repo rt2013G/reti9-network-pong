@@ -1,4 +1,4 @@
-import app.components.game as game
+import app.game as game
 
 
 def start():
