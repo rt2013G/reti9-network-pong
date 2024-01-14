@@ -1,14 +1,15 @@
-import socket
-from app.globals import DEFAULT_PORT, MAX_BUF, LOOPBACK_ADDRESS
+import socket, pickle
+from app.components import Ball
+from app.globals import DEFAULT_PORT
 
-client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-address = (LOOPBACK_ADDRESS, DEFAULT_PORT)
 
-message = input('Send a message to the server').encode()  # message to test the socket
+class Client:
+    def __init__(self, address):
+        self.test_ball = Ball()
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.address = (address, DEFAULT_PORT)
 
-client.sendto(message, address)
-try:
-    data, server = client.recvfrom(MAX_BUF)
-    print(data.decode())
-except socket.timeout:
-    print('request timed out...')
+    def send_ball_data(self):
+        test_ball = Ball()
+        data = pickle.dumps(test_ball)
+        self.client_socket.sendto(data, self.address)
