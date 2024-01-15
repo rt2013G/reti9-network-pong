@@ -1,6 +1,8 @@
 import pygame
+import socket
 from app.globals import *
 from app.components import Ball, Paddle
+from app.network import Peer
 
 
 # The Grid class represents the matrix that stores the position of all the objects.
@@ -63,11 +65,20 @@ class Scorekeeper:
         screen.blit(player_b, (SCREEN_WIDTH - TEXT_WIDTH_SPACE, TEXT_HEIGHT_SPACE))
 
 
-def run():
+def peer_run(args):
+    # Create a peer on the current process and set the other peer
+    peer = Peer(args.peer_id)
+    peer.set_other_peer(args.other_peer_address, args.other_peer_id)
+
+    # The peer with id 0 controls the left paddle
+    # the peer with id 1 controls the right paddle
+    if peer.id == 0:
+        # The left paddle starts as the initial seeder
+        peer.is_seeder = True
+
+    # Instantiates game variables
     grid = Grid()
-    ball = Ball()
-    left_paddle = Paddle()
-    right_paddle = Paddle()
+    object_data = object
     scorekeeper = Scorekeeper()
     pygame.init()
     pygame.font.init()
@@ -82,22 +93,51 @@ def run():
                 running = False
             elif i.type == pygame.KEYDOWN:
                 if i.key == pygame.K_w:
-                    left_paddle.velocity = -1
+                    peer.controlled_paddle.velocity = -1
+                    peer.send_data(peer.controlled_paddle)
                 if i.key == pygame.K_s:
-                    left_paddle.velocity = 1
-                if i.key == pygame.K_UP:
-                    right_paddle.velocity = -1
-                if i.key == pygame.K_DOWN:
-                    right_paddle.velocity = 1
+                    peer.controlled_paddle.velocity = 1
+                    peer.send_data(peer.controlled_paddle)
 
-        left_paddle.move()
-        right_paddle.move()
-        ball.move(left_paddle, right_paddle)
-        if ball.is_out():
-            scorekeeper.update_score(ball)
-            ball.reset_position()
-            ball.set_random_velocity()
-        grid.update_grid(ball, left_paddle, right_paddle)
+        try:
+            object_data = peer.receive_data()
+        except socket.timeout:
+            pass
+
+        if type(object_data) is Paddle:
+            peer.other_peer_paddle = object_data
+            peer.other_peer_paddle.move()
+
+        peer.controlled_paddle.move()
+
+        if peer.is_seeder:
+            if peer.id == 0:
+                peer.ball.move(peer.controlled_paddle, peer.other_peer_paddle)
+            else:
+                peer.ball.move(peer.other_peer_paddle, peer.controlled_paddle)
+            peer.send_data(peer.ball)
+            if peer.ball.is_out():
+                scorekeeper.update_score(peer.ball)
+                peer.ball.reset_position()
+                peer.ball.set_random_velocity()
+                peer.send_data(peer.ball)
+
+        try:
+            object_data = peer.receive_data()
+        except socket.timeout:
+            pass
+        if type(object_data) is Ball:
+            peer.ball = object_data
+        elif type(object_data) is Paddle:
+            peer.other_peer_paddle = object_data
+
+        try:
+            if peer.id == 0:
+                grid.update_grid(peer.ball, peer.controlled_paddle, peer.other_peer_paddle)
+            else:
+                grid.update_grid(peer.ball, peer.other_peer_paddle, peer.controlled_paddle)
+        except IndexError:
+            pass
         grid.display(screen)
         scorekeeper.display(screen)
         pygame.display.flip()
