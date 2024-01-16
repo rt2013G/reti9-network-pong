@@ -1,4 +1,5 @@
 import random
+import pygame
 from app.globals import *
 
 
@@ -30,6 +31,11 @@ class Ball:
         self.velocity_x = 0
         self.velocity_y = 0
         self.set_random_velocity()
+        # the seeder changes when a paddle hits the ball
+        # it makes sense to store that information in the ball object
+        # and therefore sending it in the same packet
+        # the left paddle starts as the initial seeder
+        self.seeder_id = LEFT_PADDLE_ID
 
     def set_random_velocity(self):
         # velocity on both axis should be either +1 or -1
@@ -65,15 +71,18 @@ class Ball:
             self.velocity_y = -self.velocity_y
 
         # horizontal bounds, it has to check for collision with the paddles as well
+        # if a collision happens, update the seeder
         self.pos_x += self.velocity_x
         if self.pos_x <= PADDLE_WIDTH:
             if self.check_collision_with_paddles(left_paddle, right_paddle):
                 self.pos_x = PADDLE_WIDTH
                 self.velocity_x = -self.velocity_x
+                self.seeder_id = LEFT_PADDLE_ID
         elif self.pos_x >= GRID_WIDTH - PADDLE_WIDTH:
             if self.check_collision_with_paddles(left_paddle, right_paddle):
                 self.pos_x = GRID_WIDTH - PADDLE_WIDTH
                 self.velocity_x = -self.velocity_x
+                self.seeder_id = RIGHT_PADDLE_ID
 
     # checks for collision with input paddle
     def check_collision_with_paddles(self, left_paddle, right_paddle):
@@ -88,3 +97,24 @@ class Ball:
             else:
                 return False
         return False
+
+
+# The Scorekeeper class holds the values of the players' scores
+# the display methods
+class Scorekeeper:
+    def __init__(self):
+        self.score_player_1 = 0
+        self.score_player_2 = 0
+
+    def add_score(self, left_paddle_scored):
+        if left_paddle_scored:
+            self.score_player_1 += 1
+        else:
+            self.score_player_2 += 1
+
+    def display(self, screen):
+        font = pygame.font.SysFont(SCORE_FONT, FONT_SIZE)
+        player_a = font.render(str(self.score_player_1), False, TEXT_COLOR)
+        screen.blit(player_a, (TEXT_WIDTH_SPACE, TEXT_HEIGHT_SPACE))
+        player_b = font.render(str(self.score_player_2), False, TEXT_COLOR)
+        screen.blit(player_b, (SCREEN_WIDTH - TEXT_WIDTH_SPACE, TEXT_HEIGHT_SPACE))

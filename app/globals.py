@@ -29,9 +29,11 @@ BALL_COLOR = "white"
 PADDLE_COLOR = "white"
 TEXT_COLOR = "white"
 
-# Paddle sizes
+# Paddle related variables
 PADDLE_HEIGHT = 5
 PADDLE_WIDTH = 2
+LEFT_PADDLE_ID = 0
+RIGHT_PADDLE_ID = 1
 
 # Score text properties
 SCORE_FONT = "Arial"
@@ -43,3 +45,7 @@ TEXT_HEIGHT_SPACE = 100
 LOOPBACK_ADDRESS = "127.0.0.1"
 DEFAULT_PORT = 12345
 MAX_BUF = 1024
+# 1 second is 1000ms, with 60 FPS, each frame can have at most 16.6ms
+# the game needs 3 packet per frame (ball, paddle and scorekeeper)
+# therefore the timeout for each packet is at most 5.5ms
+TIMEOUT = 0.0055
