@@ -1,7 +1,6 @@
 import sys
 import app.game as game
 from app.network import Peer
-from app.globals import LOOPBACK_ADDRESS
 from app.utils import Args
 
 

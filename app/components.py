@@ -24,13 +24,14 @@ class Paddle:
 
 
 class Ball:
-    # The ball is placed at the center of the screen at the start, with a random velocity in both axis
     def __init__(self):
+        # The ball is placed at the center of the screen at the start, with a random velocity on both axis
         self.pos_x = int(GRID_WIDTH / 2)
         self.pos_y = int(GRID_HEIGHT / 2)
         self.velocity_x = 0
         self.velocity_y = 0
         self.set_random_velocity()
+
         # the seeder changes when a paddle hits the ball
         # it makes sense to store that information in the ball object
         # and therefore sending it in the same packet
@@ -84,7 +85,7 @@ class Ball:
                 self.velocity_x = -self.velocity_x
                 self.seeder_id = RIGHT_PADDLE_ID
 
-    # checks for collision with input paddle
+    # checks for collision with the paddles
     def check_collision_with_paddles(self, left_paddle, right_paddle):
         if self.pos_x <= PADDLE_WIDTH + 1:
             if left_paddle.pos_y - PADDLE_HEIGHT < self.pos_y < left_paddle.pos_y + PADDLE_HEIGHT:
@@ -100,7 +101,7 @@ class Ball:
 
 
 # The Scorekeeper class holds the values of the players' scores
-# the display methods
+# the display method draws the scores on screen
 class Scorekeeper:
     def __init__(self):
         self.score_player_1 = 0

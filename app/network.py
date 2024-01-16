@@ -1,5 +1,7 @@
 import pickle
 import socket
+import time
+
 from app.globals import DEFAULT_PORT, MAX_BUF, TIMEOUT
 from app.components import Paddle, Ball, Scorekeeper
 
@@ -39,7 +41,8 @@ class Peer:
         # fixes an error on starting the process:
         # if the other peer isn't available yet, this prevents the process to terminate
         except socket.error:
-            pass
+            print('waiting for the other peer...')
+            time.sleep(1)
 
         if type(object_data) is Ball:
             self.ball = object_data
