@@ -26,12 +26,8 @@ class Grid:
 
         self.matrix[ball.pos_x][ball.pos_y] = BALL_CHAR
 
-    def print_grid(self):
-        for j in range(GRID_HEIGHT):
-            for i in range(GRID_WIDTH):
-                print(self.matrix[i][j], end='')
-            print(EMPTY_CHAR)
-
+    # Displays the grid with pygame, each object needs to be scaled by a factor of SCREEN_RATIO
+    # as the matrix is smaller than the actual screen
     def display(self, screen):
         for j in range(GRID_HEIGHT):
             for i in range(GRID_WIDTH):
@@ -51,9 +47,9 @@ def peer_run(args):
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
 
-    # Create a peer on the current process and set the other peer
+    # Create a peer on the current process and set the other peer accordingly
     peer = Peer(args.peer_id)
-    peer.set_other_peer(args.other_peer_address, args.other_peer_id)
+    peer.set_other_peer(args.other_peer_address)
 
     # The peer with id 0 controls the left paddle
     # the peer with id 1 controls the right paddle
@@ -62,6 +58,10 @@ def peer_run(args):
     else:
         pygame.display.set_caption("Right paddle")
 
+    # Main game loop
+    # The peers shares their controlled paddle information each frame
+    # The seeder peer, that is, the last peer that touched the ball with the paddle,
+    # is responsible for updating the ball position and sending it to the other peer
     while True:
         screen.fill(SCREEN_COLOR)
         for i in pygame.event.get():
@@ -74,14 +74,13 @@ def peer_run(args):
                 if i.key == pygame.K_s:
                     peer.controlled_paddle.velocity = 1
 
-        # after the paddle moves, it sends the paddle data
-        # then tries to get it from the other peer
+        # after the paddle moves, it sends the paddle data to the other peer
+        # and then tries to get their paddle position
         peer.controlled_paddle.move()
         peer.send_data(peer.controlled_paddle)
-
         peer.receive_and_replace_object_data()
 
-        # next the peers handles the ball movement and sends the ball data
+        # next the seeder peer handles the ball movement and sends the ball data
         if peer.ball.seeder_id == peer.id:
             if peer.id == 0:
                 peer.ball.move(peer.controlled_paddle, peer.other_peer_paddle)
@@ -97,10 +96,13 @@ def peer_run(args):
                 peer.ball.set_random_velocity()
                 peer.send_data(peer.ball)
                 peer.send_data(peer.scorekeeper)
+        # the other peer simply receives the ball and scorekeeper data
         else:
             peer.receive_and_replace_object_data()
             peer.receive_and_replace_object_data()
 
+        # both peers then update their local grids with the information they have,
+        # and draw the grids on their screens accordingly
         try:
             if peer.id == 0:
                 grid.update_grid(peer.ball, peer.controlled_paddle, peer.other_peer_paddle)

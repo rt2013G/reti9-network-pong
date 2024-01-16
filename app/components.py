@@ -32,10 +32,10 @@ class Ball:
         self.velocity_y = 0
         self.set_random_velocity()
 
-        # the seeder changes when a paddle hits the ball
-        # it makes sense to store that information in the ball object
-        # and therefore sending it in the same packet
-        # the left paddle starts as the initial seeder
+        # The seeder changes when a paddle hits the ball,
+        # so it makes sense to store that information in the ball object
+        # and therefore sending it in the same packet.
+        # The left paddle starts as the initial seeder
         self.seeder_id = LEFT_PADDLE_ID
 
     def set_random_velocity(self):
@@ -61,6 +61,8 @@ class Ball:
         self.pos_y = int(GRID_HEIGHT / 2)
         self.set_random_velocity()
 
+    # Moves the ball based on the current velocity then checks collisions with paddles
+    # and updates the seeder if necessary
     def move(self, left_paddle, right_paddle):
         # vertical bounds, it doesn't have to check anything else as the ball just bounces off
         self.pos_y += self.velocity_y

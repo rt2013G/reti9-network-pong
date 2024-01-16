@@ -45,7 +45,7 @@ TEXT_HEIGHT_SPACE = 100
 LOOPBACK_ADDRESS = "127.0.0.1"
 DEFAULT_PORT = 12345
 MAX_BUF = 1024
-# 1 second is 1000ms, with 60 FPS, each frame can have at most 16.6ms
-# the game needs 3 packet per frame (ball, paddle and scorekeeper)
-# therefore the timeout for each packet is at most 5.5ms
+# 1 second is 1000ms, with 60 FPS each frame can have at most 16.6ms
+# the game needs 3 packets per frame (ball, paddle and scorekeeper)
+# therefore the timeout for each packet can be at most 5.5ms
 TIMEOUT = 0.0055
