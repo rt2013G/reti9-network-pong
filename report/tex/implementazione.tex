@@ -1,0 +1,119 @@
+%! Author = Raffaele
+%! Date = 17/01/2024
+
+\thispagestyle{headings}
+\newpage
+\section{Dettagli implementativi}\label{sec:implementazione}
+
+\subsection{Implementazione dei Peer}\label{subsec:implementazione-dei-peer}
+
+La classe Peer è stata progettata nel seguente modo:
+\begin{itemize}
+    \item Il costruttore della classe crea la socket UDP ed effettua il bind su tutte le interfacce, utilizzando
+    una porta di default arbitaria. \\
+    Vengono poi create le variabili degli oggetti utilizzati all'interno del gioco, l'implementazione
+    delle classi di tali oggetti è presente nel file
+    \textit{app/components.py}
+    \item L'indirizzo dell'altro peer viene passato come argomento da linea di comando ed inserito opportunamente.
+    \item Il metodo send\_data trasforma l'oggetto Python da inviare in uno stream di byte attraverso il modulo
+    \textit{pickle}.
+    \item Il metodo \textit{receive\_data} gestisce l'ottenimento dei dati dalla \textit{recvfrom}, trasformando lo
+    stream di byte in un oggetto Python. \\
+    E' importante inserire un timeout, in quanto è imperativo che la recvfrom non blocchi indefinitivamente il processo:
+    il timeout è stato impostato tramite una costante a \textit{5.5 ms}, questo numero deriva dal fatto che se si vuole
+    mantenere il gioco a 60 \textit{frame al secondo}, è necessario che ogni frame non richieda più di \textit{16.6 ms}.
+    Poiché in ogni frame un Peer al più deve ricevere informazioni sulla pallina, sulla racchetta dell'altro giocatore
+    e sullo score, il valore massimo di attesa non può essere più elevato.
+    \item Il metodo \textit{receive\_and\_replace\_object\_data} richiama il metodo \textit{receive\_data} ed effettua
+    l'azione appropriata a seconda dell'oggetto ritornato.
+        \begin{itemize}
+            \item Se viene ritornato un oggetto, si aggiorna opportunamente la variabile relativa.
+            \item Se la chiamata va in \textit{timeout}, la funzione ritorna. \\
+            Il timeout viene effettivamente ignorato in quanto è importante che il gioco prosegui, uno spostamento
+            di un frame mancato non è particolarmente impattante sull'applicazione rispetto ad un processo che si blocca
+            per assicurarsi che ogni pacchetto inviato sia ricevuto.
+            \item Se vi è un altro errore, solitamente causato dalla mancanza dell'altro peer, il processo semplicemente
+            va in sleep per un secondo prima di ritentare.
+        \end{itemize}
+\end{itemize}
+
+\begin{figure}
+    \begin{verbatim}
+    # import omessi per semplicità
+
+        class Peer:
+    def __init__(self, paddle_id):
+        # viene creata una socket associata al peer
+        # il bind viene effettuato su '', che è l'equivalente di INADDR_ANY
+        self.peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        # come porta viene utilizzata una porta di default arbitaria
+        # a cui viene aggiunto l'id del paddle
+        self.peer_socket.bind(('', DEFAULT_PORT + paddle_id))
+
+        # l'id è 0 (racchetta sinistra) o 1 (racchetta destra)
+        self.id = paddle_id
+
+        # inizializzazione delle variabili utilizzate dalla classe
+        self.other_peer = ('', DEFAULT_PORT + paddle_id)
+        self.controlled_paddle = Paddle()
+        self.other_peer_paddle = Paddle()
+        self.ball = Ball()
+        self.scorekeeper = Scorekeeper()
+
+    # l'indirizzo dell'altro seed viene passato
+    # come argomento da riga di comando
+    def set_other_peer(self, address):
+        if self.id == LEFT_PADDLE_ID:
+            self.other_peer = (address, DEFAULT_PORT + RIGHT_PADDLE_ID)
+        else:
+            self.other_peer = (address, DEFAULT_PORT + LEFT_PADDLE_ID)
+    \end{verbatim}
+    \caption{Implementazione del costruttore della classe Peer}
+    \label{fig:peer1}
+\end{figure}
+
+\begin{figure}
+    \begin{verbatim}
+    # invia dati all'altro peer
+    # trasforma l'oggetto in uno stream di byte con pickle
+    def send_data(self, object_data):
+        data = pickle.dumps(object_data)
+        self.peer_socket.sendto(data, self.other_peer)
+
+    # riceve dati dall'altro peer dopo aver inserito il timeout
+    # ritorna un oggetto Python ottenuto dallo stream di byte con pickle
+    def receive_data(self):
+        self.peer_socket.settimeout(TIMEOUT)
+        data, address = self.peer_socket.recvfrom(MAX_BUF)
+        object_data = pickle.loads(data)
+        return object_data
+
+    # ottiene un oggetto chiamando il metodo receive_data
+    # ed effettua l'operazione appropriata
+    def receive_and_replace_object_data(self):
+        object_data = object
+        try:
+            object_data = self.receive_data()
+
+        # se la recvfrom va in timeout la funzione semplicemente ritorna
+        except socket.timeout:
+            return
+
+        # se l'altro processo non è presente, aspetta
+        except socket.error:
+            print('waiting for the other peer...')
+            time.sleep(1)
+
+        # se riceve un oggetto correttamente
+        # effettua l'operazione appropriata
+        if type(object_data) is Ball:
+            self.ball = object_data
+        elif type(object_data) is Paddle:
+            self.other_peer_paddle = object_data
+        elif type(object_data) is Scorekeeper:
+            self.scorekeeper = object_data
+    \end{verbatim}
+    \label{fig:peer2}
+\end{figure}
+

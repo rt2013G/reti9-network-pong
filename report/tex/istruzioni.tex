@@ -1,0 +1,45 @@
+%! Author = Raffaele
+%! Date = 17/01/2024
+
+\thispagestyle{headings}
+\newpage
+\section{Manuale istruzioni sull'esecuzione}\label{sec:istruzioni}
+\textit{Assicurarsi di avere Python installato su ogni macchina, il progetto è stato sviluppato con Python 3.11.4} \\ \\
+L'applicazione può essere eseguita come segue:
+\begin{itemize}
+    \item Clonare la repository:
+        \begin{verbatim}
+            git clone
+            https://github.com/rt2013G/reti9-network-pong.git
+            && cd reti9-network-pong
+        \end{verbatim}
+    \item Creare un virtual environment ed attivarlo:
+        \begin{verbatim}
+            virtualenv -p python3 ./venv
+            && source ./venv/bin/activate
+        \end{verbatim}
+    \item Installare i package necessari:
+        \begin{verbatim}
+            pip install -r requirements.txt
+        \end{verbatim}
+    \item Avviare l'applicazione sulla macchina su cui utilizzare la racchetta di \textbf{destra}. \\
+    Questo passaggio è importante in quanto di default il seeder iniziale è la racchetta sinistra. \\
+        \begin{verbatim}
+            python3 pong.py 1 <IP controparte>
+        \end{verbatim}
+        oppure, se i due processi si trovano sulla stessa macchina:
+        \begin{verbatim}
+            python3 pong.py 1
+        \end{verbatim}
+        L'applicazione inserirà automaticamente l'indirizzo di loopback in questo caso.
+    \item Avviare l'applicazione sulla macchina su cui utilizzare la racchetta di \textbf{sinistra}. \\
+    Attenzione: il gioco inizierà automaticamente
+        \begin{verbatim}
+            python3 pong.py 0 <IP controparte>
+        \end{verbatim}
+        oppure, se i due processi si trovano sulla stessa macchina:
+        \begin{verbatim}
+            python3 pong.py 0
+        \end{verbatim}
+        L'applicazione inserirà automaticamente l'indirizzo di loopback in questo caso.
+\end{itemize}

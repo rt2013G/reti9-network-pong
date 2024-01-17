@@ -1,0 +1,78 @@
+%! Author = Raffaele Talente
+%! Date = 16/01/2024
+
+% Preamble
+\documentclass[11pt,italian,a4paper,oneside,openright]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[hyperindex]{hyperref}
+\usepackage{amsfonts}
+\usepackage{vmargin}
+\usepackage{ragged2e}
+
+\graphicspath{{img/}}
+\hypersetup{colorlinks=true, linkcolor=black}
+
+\title{Network Pong}
+\author{Raffaele Talente}
+
+% Document
+\begin{document}
+    \pagenumbering{Roman}
+    \vskip 1cm \large \centerline{\textsc{Università degli Studi di
+    Napoli ``Parthenope''}}
+
+    \centerline {\small\textsc{Corso di laurea in Informatica
+        (percorso Generale)}}
+
+    \begin{center}
+        \includegraphics[scale=0.24]{logo_parthenope}
+    \end{center}
+
+    \vskip 0.5cm
+
+    \large \centerline {\textsc{Corso di Reti di Calcolatori e Laboratorio}}
+
+    \vskip 0.5cm
+
+    \Large \centerline {Network Pong}
+
+
+    \vskip 4.5cm
+
+
+    \large
+    \begin{minipage}[t]{7cm}
+        \textsc{Docente}
+
+        Emanuel Di Nardo\\
+
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{5cm}
+        \hfill \textsc{Candidato}
+
+        \hfill Raffaele Talente
+        \hfill 0124002658
+    \end{minipage}
+
+    \vskip 2.0 cm \Large \centerline {Anno Accademico 2023--2024}
+    \vfill \eject
+
+    \tableofcontents
+
+    \newpage
+
+    \pagenumbering{arabic}
+    \input{tex/descrizione}
+    \input{tex/schema}
+    \input{tex/implementazione}
+    \input{tex/gioco}
+    \input{tex/istruzioni}
+
+    \newpage
+    \pagestyle{plain}
+
+\end{document}

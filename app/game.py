@@ -80,7 +80,7 @@ def peer_run(args):
         peer.send_data(peer.controlled_paddle)
         peer.receive_and_replace_object_data()
 
-        # next the seeder peer handles the ball movement and sends the ball data
+        # next, the seeder peer handles the ball movement and sends the ball data
         if peer.ball.seeder_id == peer.id:
             if peer.id == 0:
                 peer.ball.move(peer.controlled_paddle, peer.other_peer_paddle)

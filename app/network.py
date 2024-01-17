@@ -26,6 +26,12 @@ class Peer:
         else:
             self.other_peer = (address, DEFAULT_PORT + LEFT_PADDLE_ID)
 
+        # Sends data to the other peer
+
+    def send_data(self, object_data):
+        data = pickle.dumps(object_data)
+        self.peer_socket.sendto(data, self.other_peer)
+
     # Receives data from the socket and parses it using pickle
     def receive_data(self):
         self.peer_socket.settimeout(TIMEOUT)
@@ -57,8 +63,3 @@ class Peer:
             self.other_peer_paddle = object_data
         elif type(object_data) is Scorekeeper:
             self.scorekeeper = object_data
-
-    # Sends data to the other peer
-    def send_data(self, object_data):
-        data = pickle.dumps(object_data)
-        self.peer_socket.sendto(data, self.other_peer)
