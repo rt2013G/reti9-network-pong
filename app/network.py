@@ -26,8 +26,7 @@ class Peer:
         else:
             self.other_peer = (address, DEFAULT_PORT + LEFT_PADDLE_ID)
 
-        # Sends data to the other peer
-
+    # Sends data to the other peer
     def send_data(self, object_data):
         data = pickle.dumps(object_data)
         self.peer_socket.sendto(data, self.other_peer)
